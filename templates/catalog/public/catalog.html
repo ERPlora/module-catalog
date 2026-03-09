@@ -1,0 +1,262 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ catalog_title }}</title>
+
+    <!-- Favicon (store logo or default) -->
+    {% if store.logo %}
+    <link rel="icon" type="image/png" href="{{ store.logo.url }}">
+    <link rel="apple-touch-icon" href="{{ store.logo.url }}">
+    {% else %}
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    {% endif %}
+
+    <!-- Open Graph (social sharing) -->
+    <meta property="og:title" content="{{ catalog_title }}">
+    <meta property="og:description" content="{{ config.description|default:store.tagline }}">
+    <meta property="og:type" content="website">
+    {% if store.logo %}
+    <meta property="og:image" content="{{ store.logo.url }}">
+    {% endif %}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ catalog_title }}">
+    <meta name="twitter:description" content="{{ config.description|default:store.tagline }}">
+
+    <!-- UX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ERPlora/ux@main/dist/ux-full.min.css">
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: var(--base-100);
+            color: var(--base-content);
+            min-height: 100vh;
+        }
+        .catalog-header {
+            text-align: center;
+            padding: 2.5rem 1rem 1.5rem;
+        }
+        .catalog-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+        }
+        .catalog-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0;
+        }
+        .catalog-description {
+            font-size: 0.875rem;
+            opacity: 0.6;
+            margin-top: 0.25rem;
+        }
+        .catalog-section {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 0 1rem 2rem;
+        }
+        .category-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.5;
+            padding: 1rem 0 0.5rem;
+            border-bottom: 1px solid var(--base-200);
+            margin-bottom: 0;
+        }
+        .catalog-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--base-200);
+            gap: 1rem;
+        }
+        .catalog-item:last-child {
+            border-bottom: none;
+        }
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .item-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+        .item-description {
+            font-size: 0.8125rem;
+            opacity: 0.55;
+            margin-top: 0.125rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .item-price {
+            font-weight: 700;
+            font-size: 0.9375rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .catalog-footer {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+            text-align: center;
+        }
+        .contact-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .contact-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.15s;
+        }
+        .contact-btn:hover { opacity: 0.85; }
+        .contact-btn-phone {
+            background: var(--primary);
+            color: var(--primary-content, #fff);
+        }
+        .contact-btn-email {
+            background: var(--info, #3b82f6);
+            color: #fff;
+        }
+        .contact-btn-whatsapp {
+            background: #25D366;
+            color: #fff;
+        }
+        .powered-by {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            opacity: 0.35;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: var(--base-100, #1a1a2e); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="catalog-header">
+        {% if store.logo %}
+        <img src="{{ store.logo.url }}" alt="{{ catalog_title }}" class="catalog-logo">
+        {% endif %}
+        <h1 class="catalog-title">{{ catalog_title }}</h1>
+        {% if config.description %}
+        <p class="catalog-description">{{ config.description }}</p>
+        {% endif %}
+    </header>
+
+    <main class="catalog-section">
+
+        <!-- Products -->
+        {% if products_by_category %}
+        {% for category, items in products_by_category.items %}
+        <div class="category-title">
+            {% if category %}{{ category.name }}{% else %}{% trans "Other Products" %}{% endif %}
+        </div>
+        {% for product in items %}
+        <div class="catalog-item">
+            <div class="item-info">
+                <div class="item-name">{{ product.name }}</div>
+                {% if product.description %}
+                <div class="item-description">{{ product.description }}</div>
+                {% endif %}
+            </div>
+            {% if config.show_prices %}
+            <div class="item-price">{{ product.price|floatformat:2 }} €</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+
+        <!-- Services -->
+        {% if services_by_category %}
+        {% for category, items in services_by_category.items %}
+        <div class="category-title">
+            {% if category %}{{ category.name }}{% else %}{% trans "Other Services" %}{% endif %}
+        </div>
+        {% for service in items %}
+        <div class="catalog-item">
+            <div class="item-info">
+                <div class="item-name">{{ service.name }}</div>
+                {% if service.short_description %}
+                <div class="item-description">{{ service.short_description }}</div>
+                {% elif service.description %}
+                <div class="item-description">{{ service.description }}</div>
+                {% endif %}
+            </div>
+            {% if config.show_prices and service.price %}
+            <div class="item-price">
+                {% if service.pricing_type == 'from' %}{% trans "From" %} {% endif %}
+                {{ service.price|floatformat:2 }} €
+                {% if service.pricing_type == 'hourly' %}/h{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+
+        {% if not products_by_category and not services_by_category %}
+        <div class="text-center py-12 opacity-50">
+            <p class="text-sm">{% trans "No items to display yet." %}</p>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Footer with contact info -->
+    {% if config.show_phone or config.show_email or config.show_whatsapp %}
+    <footer class="catalog-footer">
+        <div class="contact-buttons">
+            {% if config.show_phone and store.phone %}
+            <a href="tel:{{ store.phone }}" class="contact-btn contact-btn-phone">
+                📞 {{ store.phone }}
+            </a>
+            {% endif %}
+
+            {% if config.show_email and store.email %}
+            <a href="mailto:{{ store.email }}" class="contact-btn contact-btn-email">
+                ✉️ {{ store.email }}
+            </a>
+            {% endif %}
+
+            {% if config.show_whatsapp and whatsapp_url %}
+            <a href="{{ whatsapp_url }}" target="_blank" rel="noopener" class="contact-btn contact-btn-whatsapp">
+                💬 WhatsApp
+            </a>
+            {% endif %}
+        </div>
+
+        {% if store.business_address %}
+        <p class="text-xs opacity-40 mt-4">{{ store.business_address }}</p>
+        {% endif %}
+
+        <p class="powered-by">Powered by ERPlora</p>
+    </footer>
+    {% endif %}
+
+</body>
+</html>

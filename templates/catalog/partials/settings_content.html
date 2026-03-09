@@ -1,0 +1,184 @@
+{% load djicons i18n %}
+
+<div class="p-4">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">{% trans "Catalog Settings" %}</h1>
+        <p class="text-sm mt-1 opacity-60">{% trans "Configure your public catalog" %}</p>
+    </div>
+
+    <form hx-post="{% url 'catalog:settings' %}"
+          hx-swap="none"
+          class="space-y-6">
+        {% csrf_token %}
+
+        <!-- General -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title text-base">{% trans "General" %}</h2>
+            </div>
+            <div class="card-body divide-y divide-base-300">
+
+                <!-- Enable Public Catalog -->
+                <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-sm">{% trans "Enable Public Catalog" %}</h3>
+                        <p class="text-xs opacity-60 mt-0.5">{% trans "Make your catalog accessible to anyone with the link" %}</p>
+                    </div>
+                    <label class="toggle color-success">
+                        <input type="checkbox" name="is_active"
+                               {% if config.is_active %}checked{% endif %}>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+
+                <!-- Custom Title -->
+                <div class="py-4 first:pt-0 last:pb-0">
+                    <label class="block font-semibold text-sm mb-1">{% trans "Catalog Title" %}</label>
+                    <p class="text-xs opacity-60 mb-2">{% trans "Leave empty to use your business name" %}</p>
+                    <input type="text" name="title" value="{{ config.title }}"
+                           placeholder="{{ store.business_name }}"
+                           class="input w-full">
+                </div>
+
+                <!-- Description -->
+                <div class="py-4 first:pt-0 last:pb-0">
+                    <label class="block font-semibold text-sm mb-1">{% trans "Description" %}</label>
+                    <p class="text-xs opacity-60 mb-2">{% trans "Short text shown below the title" %}</p>
+                    <textarea name="description" rows="2"
+                              class="textarea w-full"
+                              placeholder="{% trans 'e.g. Fresh food & drinks since 2020' %}">{{ config.description }}</textarea>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title text-base">{% trans "Content" %}</h2>
+            </div>
+            <div class="card-body divide-y divide-base-300">
+
+                <!-- Show Products -->
+                <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-sm">{% trans "Show Products" %}</h3>
+                        <p class="text-xs opacity-60 mt-0.5">{% trans "Display products from your inventory" %}</p>
+                    </div>
+                    <label class="toggle color-success">
+                        <input type="checkbox" name="show_products"
+                               {% if config.show_products %}checked{% endif %}>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+
+                <!-- Show Services -->
+                <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-sm">{% trans "Show Services" %}</h3>
+                        <p class="text-xs opacity-60 mt-0.5">{% trans "Display your services" %}</p>
+                    </div>
+                    <label class="toggle color-success">
+                        <input type="checkbox" name="show_services"
+                               {% if config.show_services %}checked{% endif %}>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+
+                <!-- Show Prices -->
+                <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-sm">{% trans "Show Prices" %}</h3>
+                        <p class="text-xs opacity-60 mt-0.5">{% trans "Display prices next to each item" %}</p>
+                    </div>
+                    <label class="toggle color-success">
+                        <input type="checkbox" name="show_prices"
+                               {% if config.show_prices %}checked{% endif %}>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title text-base">{% trans "Contact Information" %}</h2>
+                <p class="text-xs opacity-60">{% trans "Choose which contact options to show in your catalog" %}</p>
+            </div>
+            <div class="card-body divide-y divide-base-300">
+
+                <!-- Show Phone -->
+                <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-sm">{% trans "Phone" %}</h3>
+                        <p class="text-xs opacity-60 mt-0.5">
+                            {% if store.phone %}
+                                {{ store.phone }}
+                            {% else %}
+                                {% trans "Not configured — set it in Store Settings" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <label class="toggle color-success">
+                        <input type="checkbox" name="show_phone"
+                               {% if config.show_phone %}checked{% endif %}
+                               {% if not store.phone %}disabled{% endif %}>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+
+                <!-- Show Email -->
+                <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-sm">{% trans "Email" %}</h3>
+                        <p class="text-xs opacity-60 mt-0.5">
+                            {% if store.email %}
+                                {{ store.email }}
+                            {% else %}
+                                {% trans "Not configured — set it in Store Settings" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <label class="toggle color-success">
+                        <input type="checkbox" name="show_email"
+                               {% if config.show_email %}checked{% endif %}
+                               {% if not store.email %}disabled{% endif %}>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+
+                <!-- Show WhatsApp -->
+                <div class="flex items-center justify-between py-4 first:pt-0 last:pb-0">
+                    <div class="flex-1 pr-4">
+                        <h3 class="font-semibold text-sm">{% trans "WhatsApp" %}</h3>
+                        <p class="text-xs opacity-60 mt-0.5">
+                            {% if store.phone %}
+                                {% trans "Uses your phone number" %}: {{ store.phone }}
+                            {% else %}
+                                {% trans "Not configured — set a phone number in Store Settings" %}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <label class="toggle color-success">
+                        <input type="checkbox" name="show_whatsapp"
+                               {% if config.show_whatsapp %}checked{% endif %}
+                               {% if not store.phone %}disabled{% endif %}>
+                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    </label>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="flex justify-end">
+            <button type="submit" class="btn color-primary">
+                {% icon "checkmark-outline" %}
+                {% trans "Save Settings" %}
+            </button>
+        </div>
+    </form>
+</div>

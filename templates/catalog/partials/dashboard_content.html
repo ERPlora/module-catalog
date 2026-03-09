@@ -1,0 +1,146 @@
+{% load djicons i18n %}
+
+<div class="p-4">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">{% trans "Public Catalog" %}</h1>
+        <p class="text-sm mt-1 opacity-60">{% trans "Share your products and services with your customers" %}</p>
+    </div>
+
+    {% if not config.is_active %}
+    <!-- Inactive Banner -->
+    <div class="callout callout-warning mb-6">
+        <div class="callout-icon">{% icon "warning-outline" %}</div>
+        <div class="callout-content">
+            <span class="callout-title">{% trans "Catalog is disabled" %}</span>
+            <span class="callout-text">{% trans "Enable it in Settings to make it accessible." %}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- QR Code Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title text-base">{% trans "QR Code" %}</h2>
+            </div>
+            <div class="card-body flex flex-col items-center gap-4">
+                <div id="qr-code" class="bg-white p-4 rounded-lg"></div>
+                <p class="text-xs opacity-60 text-center">{% trans "Scan to open your public catalog" %}</p>
+
+                <!-- Print QR Button -->
+                <button onclick="printQR()" class="btn btn-outline btn-sm">
+                    {% icon "print-outline" %}
+                    {% trans "Print QR" %}
+                </button>
+            </div>
+        </div>
+
+        <!-- Share Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title text-base">{% trans "Share" %}</h2>
+            </div>
+            <div class="card-body space-y-4">
+                <!-- URL -->
+                <div>
+                    <label class="block font-semibold text-sm mb-1">{% trans "Catalog URL" %}</label>
+                    <div class="flex gap-2">
+                        <input type="text" value="{{ catalog_url }}" readonly
+                               id="catalog-url" class="input w-full text-sm">
+                        <button onclick="copyURL()" class="btn btn-outline btn-sm" title="{% trans 'Copy' %}">
+                            {% icon "copy-outline" %}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Social Share Buttons -->
+                <div>
+                    <label class="block font-semibold text-sm mb-3">{% trans "Share on social media" %}</label>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://wa.me/?text={{ catalog_url|urlencode }}"
+                           target="_blank" rel="noopener"
+                           class="btn btn-sm color-success">
+                            {% icon "logo-whatsapp" %}
+                            WhatsApp
+                        </a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ catalog_url|urlencode }}"
+                           target="_blank" rel="noopener"
+                           class="btn btn-sm color-primary">
+                            {% icon "logo-facebook" %}
+                            Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ catalog_url|urlencode }}"
+                           target="_blank" rel="noopener"
+                           class="btn btn-sm color-info">
+                            {% icon "logo-twitter" %}
+                            X / Twitter
+                        </a>
+                        <a href="https://t.me/share/url?url={{ catalog_url|urlencode }}"
+                           target="_blank" rel="noopener"
+                           class="btn btn-sm color-info">
+                            {% icon "paper-plane-outline" %}
+                            Telegram
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Open Preview -->
+                <div class="pt-2">
+                    <a href="{{ catalog_url }}" target="_blank" rel="noopener"
+                       class="btn color-primary w-full">
+                        {% icon "open-outline" %}
+                        {% trans "Open Catalog" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- QR Code Generation (lightweight inline SVG) -->
+<script nonce="{{ csp_nonce }}">
+// Minimal QR code generator using Canvas API
+function generateQR(text, container) {
+    // Use a simple QR code via Google Charts API rendered as image
+    const size = 200;
+    const img = document.createElement('img');
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&format=svg`;
+    img.alt = 'QR Code';
+    img.width = size;
+    img.height = size;
+    img.style.imageRendering = 'pixelated';
+    container.appendChild(img);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('qr-code');
+    if (container) {
+        generateQR('{{ catalog_url }}', container);
+    }
+});
+
+function copyURL() {
+    const input = document.getElementById('catalog-url');
+    navigator.clipboard.writeText(input.value);
+}
+
+function printQR() {
+    const qrContainer = document.getElementById('qr-code');
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head><title>QR Code - {{ store.business_name }}</title></head>
+        <body style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;">
+            <h2 style="margin-bottom:1rem;">{{ store.business_name }}</h2>
+            ${qrContainer.innerHTML}
+            <p style="margin-top:1rem;color:#666;font-size:14px;">{{ catalog_url }}</p>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = function() { printWindow.print(); };
+}
+</script>
